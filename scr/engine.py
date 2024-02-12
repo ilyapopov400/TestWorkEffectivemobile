@@ -17,7 +17,7 @@ class Phonebook:
         self.commands_to_execute = {
             1: ["Список вызываемых команд", self.help],
             2: ["Посмотреть ВСЕ записи в телефонном справочнике", self.all_phone],
-            3: ["", ""],
+            3: ["Добавление новой записи в справочник", self.add_note],
             4: ["", ""],
         }
 
@@ -54,6 +54,33 @@ class Phonebook:
         self.show_one_line(line=self.head)
         for line in self.table:
             self.show_one_line(line=line)
+
+    def add_note(self):
+        '''
+        Добавление новой записи в справочник
+        проверка на длинну записи
+        :return: None
+        '''
+        print(
+            "Добавьте данные\nфамилия, имя, отчество, название организации, телефон рабочий, телефон личный (сотовый)\n"
+            "не более 15 символов")
+
+        while True:
+            family, name, surname, organization, phone_working, phone_personal = input("family: "), input(
+                "name: "), input(
+                "surname: "), input("organization: "), input("phone_working: "), input("phone_personal: ")
+            line = [family, name, surname, organization, phone_working, phone_personal]
+            result = [(len(x) > 15) for x in line]
+            if not bool(any(result)):
+                self.table.append(line)
+                break
+            print("значения должны быть не более 15 символов")
+
+        with open(self.path_db, 'w', encoding='utf-8', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(self.head)  # запись заголовков
+            for row in self.table:  # запись строк
+                writer.writerow(row)
 
     def run(self, number):
         '''
