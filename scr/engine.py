@@ -36,7 +36,7 @@ class Phonebook:
         for key, volume in self.commands_to_execute.items():
             print(f'{key}:  {volume[0]}')
 
-    def show_one_line(self, line: list):
+    def _show_one_line(self, line: list):
         '''
         вывод одной форматированной строки
         :param line:
@@ -46,14 +46,26 @@ class Phonebook:
             *line)
         )
 
+    def _check_line(self, line: list) -> bool:
+        '''
+        проверка правильности заполнения данных в полях справочника
+        :param line:
+        :return: bool
+        '''
+        flag = True   # TODO сделать еще проверки
+        result = [(len(x) <= 15) for x in line]  # проверка длинны не более 15 символов
+        if not bool(all(result)):
+            flag = False
+        return flag
+
     def all_phone(self):
         '''
         вывод всего телефонного справочника
         :return: None
         '''
-        self.show_one_line(line=self.head)
+        self._show_one_line(line=self.head)
         for line in self.table:
-            self.show_one_line(line=line)
+            self._show_one_line(line=line)
 
     def add_note(self):
         '''
@@ -70,8 +82,8 @@ class Phonebook:
                 "name: "), input(
                 "surname: "), input("organization: "), input("phone_working: "), input("phone_personal: ")
             line = [family, name, surname, organization, phone_working, phone_personal]
-            result = [(len(x) > 15) for x in line]
-            if not bool(any(result)):
+
+            if self._check_line(line=line):  # проверка правильности заполнения данных
                 self.table.append(line)
                 break
             print("значения должны быть не более 15 символов")
@@ -82,7 +94,7 @@ class Phonebook:
             for row in self.table:  # запись строк
                 writer.writerow(row)
 
-    def run(self, number):
+    def run(self, number: int):
         '''
         запускает выполнение метода класса по порядковому номеру
         :param number:
