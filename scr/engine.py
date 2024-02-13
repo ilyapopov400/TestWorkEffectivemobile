@@ -27,7 +27,7 @@ class Phonebook:
         приветствие пользователя
         :return: None
         '''
-        print("Welcome to the phonebook!")
+        print("Welcome to the phonebook!\n")
 
     def help(self):
         '''
@@ -36,6 +36,7 @@ class Phonebook:
         '''
         for key, volume in self.commands_to_execute.items():
             print(f'{key}:  {volume[0]}')
+        print()
 
     def _show_one_line(self, line: list):
         '''
@@ -104,6 +105,7 @@ class Phonebook:
             print("значения должны быть не более 15 символов")
 
         self._writing_table(path=self.path_db, head=self.head, table=self.table)  # запись таблицы
+        print("Ваша запись добавлена в телефонный справочник")
 
     def search(self) -> list:
         '''
@@ -156,6 +158,7 @@ class Phonebook:
                 del self.table[number_of_edit_line]
                 self.table.append(new_line)
                 self._writing_table(path=self.path_db, head=self.head, table=self.table)  # запись таблицы
+                print("Ваша запись в телефонный справочник обновлена")
             else:
                 print("Вы неверно ввели новые значения")
 
