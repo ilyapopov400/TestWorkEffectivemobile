@@ -16,9 +16,10 @@ class Phonebook:
 
         self.commands_to_execute = {
             1: ["Список вызываемых команд", self.help],
-            2: ["Посмотреть ВСЕ записи в телефонном справочнике", self.all_phone],
-            3: ["Добавление новой записи в справочник", self.add_note],
-            4: ["", ""],
+            2: ["Просмотр ВСЕХ записей в телефонном справочнике", self.all_phone],
+            3: ["Добавление новой записи в телефонный справочник", self.add_note],
+            4: ["Редактирование имеющейся записи", self.editing_post],
+            5: ["Поиск записей по одной или нескольким характеристикам", self.search],
         }
 
     def welcome(self):
@@ -52,7 +53,7 @@ class Phonebook:
         :param line:
         :return: bool
         '''
-        flag = True   # TODO сделать еще проверки
+        flag = True  # TODO сделать еще проверки
         result = [(len(x) <= 15) for x in line]  # проверка длинны не более 15 символов
         if not bool(all(result)):
             flag = False
@@ -94,6 +95,42 @@ class Phonebook:
             for row in self.table:  # запись строк
                 writer.writerow(row)
 
+    def search(self) -> list:
+        '''
+        Поиск записей по одной или нескольким характеристикам
+        :return: список номеров строк с совпадающими записями
+        '''
+        result = list()
+
+        family = input("наберите фамилию, или нажмите ввод: ")
+        name = input("наберите имя, или нажмите ввод: ")
+        surname = input("наберите фамилию, или нажмите ввод: ")
+        organization = input("наберите организацию, или нажмите ввод: ")
+        phone_working = input("наберите рабочий телефон, или нажмите ввод: ")
+        phone_personal = input("наберите личный телефон, или нажмите ввод: ")
+
+        search_list = [family, name, surname, organization, phone_working, phone_personal]
+        number_list = list()
+
+        for number, line in enumerate(self.table):
+            res_bool = any(map(lambda x: x[0].lower() == x[1].lower(), zip(line, search_list)))
+            if res_bool:
+                result.append(line)
+                number_list.append(number)
+
+        print('Количество найденных записей: {}'.format(len(result)))
+        for line in result:
+            self._show_one_line(line=line)
+
+        return number_list
+
+    def editing_post(self):
+        '''
+        редактироване имеющейся записи в телефонном справочнике
+        :return: None
+        '''
+        pass
+
     def run(self, number: int):
         '''
         запускает выполнение метода класса по порядковому номеру
@@ -105,4 +142,4 @@ class Phonebook:
 
 if __name__ == "__main__":
     phone_book = Phonebook()
-    phone_book.run(number=2)
+    phone_book.run(number=4)
