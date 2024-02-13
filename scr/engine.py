@@ -1,17 +1,17 @@
 import csv
+import re
 from icecream import ic
 
 
 class Phonebook:
-    path_db = "./db_phone.csv"
+    path_db = "./db_phone.csv"  # путь к файлу с базой данных
 
     def __init__(self):
         with open(self.path_db, encoding='utf-8') as file:
+            rows = csv.reader(file, delimiter=',', quotechar='"')
             self.table = list()
-            for line in csv.reader(file, delimiter=',', quotechar='"'):
-                self.head = line
-                break
-            for line in csv.reader(file, delimiter=',', quotechar='"'):
+            self.head = next(rows)
+            for line in rows:
                 self.table.append(line)
 
         self.commands_to_execute = {
@@ -22,7 +22,8 @@ class Phonebook:
             5: ["Поиск записей по одной или нескольким характеристикам", self.search],
         }
 
-    def welcome(self):
+    @staticmethod
+    def welcome():
         '''
         приветствие пользователя
         :return: None
@@ -38,29 +39,56 @@ class Phonebook:
             print(f'{key}:  {volume[0]}')
         print()
 
-    def _show_one_line(self, line: list):
+    @staticmethod
+    def _show_one_line(line: list):
         '''
         вывод одной форматированной строки
         :param line:
         :return: None
         '''
-        print('{:^15}|{:^15}|{:^15}|{:^15}|{:^15}|{:^15}'.format(
+        print('{:^16}|{:^16}|{:^16}|{:^16}|{:^16}|{:^16}'.format(
             *line)
         )
 
-    def _check_line(self, line: list) -> bool:
+    @staticmethod
+    def _check_line(line: list) -> bool:
         '''
         проверка правильности заполнения данных в полях справочника
         :param line:
         :return: bool
         '''
-        flag = True  # TODO сделать еще проверки
-        result = [(len(x) <= 15) for x in line]  # проверка длинны не более 15 символов
-        if not bool(all(result)):
-            flag = False
-        return flag
+        if not bool(all([(len(x) <= 16) for x in line])):
+            print("Длинна одной записи не должна превышать 16 символов\n")
+            return False
 
-    def _writing_table(self, path, head, table):
+        for string in line[:3]:
+            pattern = r'\D+'
+            if not bool(re.fullmatch(pattern, string)):
+                print(
+                    "В фамилии, имени, отчестве должны быть только буквенные символы. не верно записано <{}>\n".format(
+                        string))
+                return False
+
+        for phone in line[4:]:
+            pattern = r"^((8|\+7)[\- ]?)?(\(?\d{3}\)?[\- ]?)?[\d\- ]{7,10}$"
+            if not bool(re.fullmatch(pattern, phone)):
+                print("Не верно записан номер телефона: <{}>\n".format(phone))
+                return False
+
+        return True
+
+    def _check_for_duplicate_entries(self, line: list) -> bool:
+        '''
+        проверка на дублирование записи в телефонном справочнике
+        :param line:
+        :return:
+        '''
+        if line in self.table:
+            print("Такая запись уже существует\n")
+            return False
+        return True
+
+    def _writing_table(self, path: str, head: list, table: list):
         '''
         запись таблицы в файл
         :param head: заголовок таблицы
@@ -86,12 +114,12 @@ class Phonebook:
     def add_note(self):
         '''
         Добавление новой записи в справочник
-        проверка на длинну записи
+        проверка на длину записи
         :return: None
         '''
         print(
             "Добавьте данные\nфамилия, имя, отчество, название организации, телефон рабочий, телефон личный (сотовый)\n"
-            "не более 15 символов")
+            "не более 16 символов")
 
         while True:
             family, name, surname, organization, phone_working, phone_personal = input("family: "), input(
@@ -99,10 +127,10 @@ class Phonebook:
                 "surname: "), input("organization: "), input("phone_working: "), input("phone_personal: ")
             line = [family, name, surname, organization, phone_working, phone_personal]
 
-            if self._check_line(line=line):  # проверка правильности заполнения данных
+            if self._check_line(line=line) and self._check_for_duplicate_entries(
+                    line=line):  # проверка правильности заполнения данных
                 self.table.append(line)
                 break
-            print("значения должны быть не более 15 символов")
 
         self._writing_table(path=self.path_db, head=self.head, table=self.table)  # запись таблицы
         print("Ваша запись добавлена в телефонный справочник")
@@ -149,12 +177,13 @@ class Phonebook:
             new_line = list()
             for old_entry in self.table[number_of_edit_line]:
                 if new_entry := input(
-                        "Впишите новое значение вместо {}, или нажмите ввод, если не хотите менять это значение: ".format(
+                        "Впишите новое значение вместо <{}>, или нажмите ввод, если не хотите менять это значение: ".format(
                             old_entry)):
                     new_line.append(new_entry)
                 else:
                     new_line.append(old_entry)
-            if self._check_line(line=new_line):
+            if self._check_line(line=new_line) and self._check_for_duplicate_entries(
+                    line=new_line):  # проверка правильности заполнения и дубля
                 del self.table[number_of_edit_line]
                 self.table.append(new_line)
                 self._writing_table(path=self.path_db, head=self.head, table=self.table)  # запись таблицы

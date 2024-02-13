@@ -9,11 +9,12 @@ def mane():
     phone_book = engine.Phonebook()
     phone_book.welcome()
     phone_book.help()
+
     while True:
-        print("Выберите число от 1 до 5 или нажмите любую другую клавишу для окончания работы программы")
+        print("Выберите число от 1 до 5 или нажмите любую другую клавишу для окончания работы программы\n<1> - help")
         user_input = input("Ваш выбор? \n")
 
-        if user_input in [str(x) for x in range(len(phone_book.commands_to_execute)+1)]:
+        if user_input in [str(x) for x in range(len(phone_book.commands_to_execute) + 1)]:
             phone_book.run(number=int(user_input))
             print("Ваше следующее действие?\n")
         else:
