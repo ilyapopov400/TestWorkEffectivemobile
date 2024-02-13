@@ -59,6 +59,20 @@ class Phonebook:
             flag = False
         return flag
 
+    def _writing_table(self, path, head, table):
+        '''
+        запись таблицы в файл
+        :param head: заголовок таблицы
+        :param table: тело таблицы
+        :param path: путь до файла
+        :return:
+        '''
+        with open(path, 'w', encoding='utf-8', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(head)  # запись заголовков
+            for row in table:  # запись строк
+                writer.writerow(row)
+
     def all_phone(self):
         '''
         вывод всего телефонного справочника
@@ -89,11 +103,7 @@ class Phonebook:
                 break
             print("значения должны быть не более 15 символов")
 
-        with open(self.path_db, 'w', encoding='utf-8', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow(self.head)  # запись заголовков
-            for row in self.table:  # запись строк
-                writer.writerow(row)
+        self._writing_table(path=self.path_db, head=self.head, table=self.table)  # запись таблицы
 
     def search(self) -> list:
         '''
@@ -129,7 +139,28 @@ class Phonebook:
         редактироване имеющейся записи в телефонном справочнике
         :return: None
         '''
-        pass
+        print("Выберите критерии поиска для редактируемой записи: ")
+        lines = self.search()
+        if bool(lines):
+            number_of_edit_line = int(input("Выберите номер по порядку редактируемой записи: 1 или 2 и т.д.: "))
+            number_of_edit_line = lines[number_of_edit_line - 1]
+            new_line = list()
+            for old_entry in self.table[number_of_edit_line]:
+                if new_entry := input(
+                        "Впишите новое значение вместо {}, или нажмите ввод, если не хотите менять это значение: ".format(
+                            old_entry)):
+                    new_line.append(new_entry)
+                else:
+                    new_line.append(old_entry)
+            if self._check_line(line=new_line):
+                del self.table[number_of_edit_line]
+                self.table.append(new_line)
+                self._writing_table(path=self.path_db, head=self.head, table=self.table)  # запись таблицы
+            else:
+                print("Вы неверно ввели новые значения")
+
+        else:
+            print("Под Ваши критерии не подходит ни одна запись в телефонном справочнике")
 
     def run(self, number: int):
         '''
